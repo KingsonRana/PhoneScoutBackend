@@ -1,5 +1,5 @@
 import specification from "../models/specifications.js";// Import your specification model
-import { validateParameter } from "../utils/validatespecs.js";
+import { validateName, validateNumber, validateParameter } from "../utils/validatespecs.js";
 
 // Create a new Specification
 export const createSpecification = async (req, res) => {
@@ -45,18 +45,20 @@ export const deleteSpecification = async (req, res) => {
 // Update a specification by ID
 export const updateSpecification = async (req, res) => {
   try {
-    // Pick only the fields you want to update
+    
     const { name, weight } = req.body;
-    const updatedFields = {};
+    
 
-    // Add only the valid fields to the update object
-    if (name !== undefined) updatedFields.name = name;
-    if (weight !== undefined) updatedFields.weight = weight;
-
-    // Find the specification by ID and update it with the selected fields
+   if(!validateName(name)){
+    return res.status(400).json({ message: "Invaild Name" });
+   }
+    if(!validateNumber(weight)){
+      return res.status(400).json({ message: "Invalid Weight" });
+    }
+    const updatedFields = {name,weight};
     const updatedSpecification = await specification.findByIdAndUpdate(
       req.params.id,
-      { $set: updatedFields }, // Ensure only the specified fields are updated
+      { $set: updatedFields }, 
       { new: true }
     );
 
@@ -64,13 +66,10 @@ export const updateSpecification = async (req, res) => {
       return res.status(404).json({ message: "Specification not found" });
     }
 
-    // Send success response
     res.status(200).json({
-      message: "Specification updated successfully",
-      data: updatedSpecification,
+      message: "Specification updated successfully"
     });
   } catch (err) {
-    // Handle any errors during updating
     res
       .status(400)
       .json({ message: "Error updating specification", error: err.message });
@@ -105,7 +104,8 @@ export const getAllSpecifications = async (req, res) => {
     const responseData = specifications.map((spec) => ({
       name: spec.name,
       weight: spec.weight,
-      id:spec._id
+      id:spec._id,
+      parameters:spec.Parameters.length
     }));
     
     res.status(200).json({ data: responseData });

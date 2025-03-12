@@ -133,3 +133,22 @@ const requiredFields = [
     return true;
   };
   
+  export const validateName = (name) => {
+    if (!name || typeof name !== "string") return false; // Ensure it's a string
+  
+    if (name.length < 2 || name.length > 14) return false; // Check length
+  
+    if (/[^a-zA-Z0-9 ]/.test(name)) return false; // Restrict special characters except space
+  
+    return true;
+  };
+  export const validateNumber = (num) => {
+    if (num === null || num === undefined || num === "") return false; // Ensure it's not empty
+    if (isNaN(num)) return false; // Ensure it's a number
+    if (num < 1 || num > 100) return false; // Check range
+  
+    // Ensure it only contains numbers or a decimal (optional leading/trailing spaces)
+    if (!/^\d+(\.\d+)?$/.test(num.toString().trim())) return false;
+  
+    return true;
+  };  
