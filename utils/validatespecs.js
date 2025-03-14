@@ -104,7 +104,7 @@ const requiredFields = [
       return false;
     }
   
-    // Ensure hasArrayValue and hasNumericalValue are not both true
+    // Ensure `hasArrayValue` and `hasNumericalValue` are not both true
     if (hasArrayValue && hasNumericalValue) {
       return false;
     }
@@ -118,12 +118,16 @@ const requiredFields = [
       ) {
         return false;
       }
-    }else if (hasNumericalValue) {
+    } else if (hasNumericalValue) {
       if (
         !numericValues || // Ensure `numericValues` exists
         numericValues.min === undefined || // Ensure `min` is defined
         numericValues.max === undefined || // Ensure `max` is defined
-        (arrayValues && arrayValues.length > 0) // Ensure `arrayValues` is empty
+        (arrayValues && arrayValues.length > 0) || // Ensure `arrayValues` is empty
+        Number.isNaN(Number(numericValues.min)) || // Ensure `min` is a valid number
+        Number.isNaN(Number(numericValues.max)) || // Ensure `max` is a valid number
+        Number(numericValues.min) < 1 || Number(numericValues.min) > 100 || // Ensure min is between 1 and 100
+        Number(numericValues.max) < 1 || Number(numericValues.max) > 100 // Ensure max is between 1 and 100
       ) {
         return false;
       }
@@ -132,6 +136,7 @@ const requiredFields = [
     // Return true if all validations pass
     return true;
   };
+  
   
   export const validateName = (name) => {
     if (!name || typeof name !== "string") return false; // Ensure it's a string

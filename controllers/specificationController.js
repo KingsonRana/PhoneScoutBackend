@@ -1,29 +1,23 @@
-import specification from "../models/specifications.js";// Import your specification model
+import specification from "../models/specifications.js";
 import { validateName, validateNumber, validateParameter } from "../utils/validatespecs.js";
 
-// Create a new Specification
 export const createSpecification = async (req, res) => {
   try {
     const newSpecification = new specification(req.body);
     await newSpecification.save();
-
-    // Send success response
     res.status(201).json({
       message: "Specification created successfully!",
       data: newSpecification,
     });
   } catch (err) {
-    // Handle any errors during saving
     res
       .status(400)
       .json({ message: "Error creating specification", error: err.message });
   }
 };
 
-// Delete a specification by ID
 export const deleteSpecification = async (req, res) => {
   try {
-    // Find and delete the specification by ID
     const deletedSpecification = await specification.findByIdAndDelete(
       req.params.id
     );
@@ -32,17 +26,14 @@ export const deleteSpecification = async (req, res) => {
       return res.status(404).json({ message: "Specification not found" });
     }
 
-    // Send success response
     res.status(200).json({ message: "Specification deleted successfully" });
   } catch (err) {
-    // Handle any errors during deletion
     res
       .status(400)
       .json({ message: "Error deleting specification", error: err.message });
   }
 };
 
-// Update a specification by ID
 export const updateSpecification = async (req, res) => {
   try {
     
@@ -76,27 +67,22 @@ export const updateSpecification = async (req, res) => {
   }
 };
 
-// Get a specification by ID
 export const getSpecification = async (req, res) => {
   try {
-    // Find the specification by ID
     const foundSpecification = await specification.findById(req.params.id);
 
     if (!foundSpecification) {
       return res.status(404).json({ message: "Specification not found" });
     }
 
-    // Send success response
     res.status(200).json({ data: foundSpecification });
   } catch (err) {
-    // Handle any errors during retrieval
     res
       .status(400)
       .json({ message: "Error retrieving specification", error: err.message });
   }
 };
 
-// Get all specifications
 export const getAllSpecifications = async (req, res) => {
   try {
   
@@ -163,38 +149,32 @@ export const addParameter = async (req,res) => {
 export const updateParameter = async (req, res) => {
   try {
     const parameter = req.body;
-
-    // Check if request body is empty
+    console.log(parameter)
     if (!parameter || Object.keys(parameter).length === 0) {
       return res.status(400).json({ message: "Request body cannot be empty" });
     }
 
-    // Validate parameter object
     const validateParameters = validateParameter(parameter);
     if (!validateParameters) {
       return res.status(400).json({ message: "One or more validation failed" });
     }
 
-    // Update the parameter
-    console.log(req.params.id + " " + req.body.id)
+    
     const updatedParameter = await specification.findOneAndUpdate(
-      { _id: req.params.id, "Parameters._id": req.body.id}, // Match the specification by ID and the parameter's ID
-      { $set: { "Parameters.$": parameter } }, // Use $ to update the specific parameter inside the array
+      { _id: req.params.id, "Parameters._id": req.body.id}, 
+      { $set: { "Parameters.$": parameter } }, 
       { new: true }
     );
 
-    // If no parameter is found, return 404
     if (!updatedParameter) {
       return res.status(404).json({ message: "Parameter not found" });
     }
-
-    // Send success response
     res.status(200).json({
       message: "Parameter updated successfully",
       data: updatedParameter,
     });
   } catch (err) {
-    // Return error response
+    
     res.status(500).json({
       message: "An error occurred while updating the parameter",
       error: err.message,
@@ -204,7 +184,7 @@ export const updateParameter = async (req, res) => {
 
 export const deleteParameter = async (req, res) => {
   try {
-    // Step 1: Check if the specification exists and contains the parameter
+
     const specificationDoc = await specification.findOne({ 
       _id: req.params.id, 
       "Parameters._id": req.body.id 
@@ -214,11 +194,10 @@ export const deleteParameter = async (req, res) => {
       return res.status(400).json({ message: "Parameter not found" });
     }
 
-    // Step 2: Delete the parameter from the Parameters array
     const updatedSpecification = await specification.findOneAndUpdate(
       { _id: req.params.id },
       { $pull: { Parameters: { _id: req.body.id } } },
-      { new: true } // Return the updated document
+      { new: true } 
     );
 
     res.status(200).json({ message: "Parameter deleted successfully", data: updatedSpecification });
